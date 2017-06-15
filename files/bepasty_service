@@ -1,0 +1,11 @@
+[Unit]
+Description=Bepasty Server
+After=network.target
+
+[Service]
+Type=simple
+User=bepasty
+ExecStart=/home/bepasty/bin/gunicorn_bepasty
+
+[Install]
+WantedBy=multi-user.target

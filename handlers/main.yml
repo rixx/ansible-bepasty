@@ -1,0 +1,6 @@
+---
+- name: Reload nginx
+  service: name=nginx state=reloaded
+
+- name: Restart bepasty
+  service: name=bepasty state=restarted

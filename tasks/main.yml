@@ -1,0 +1,129 @@
+---
+- name: Ensure that all required packages are installed
+  pacman: pkg={{item}} state=present
+  with_items:
+    - git
+    - python
+    - python-pip
+    - python-virtualenv
+  tags:
+    - bepasty
+    - packages
+
+- name: Ensure that the bepasty user is present
+  user:
+    name: bepasty
+    group: http
+    state: present
+    shell: /bin/zsh
+  tags:
+    - bepasty
+    - users
+
+- name: Make the bepasty home group-accessible
+  file:
+    path: ~bepasty
+    mode: 0770
+  tags:
+    - bepasty
+
+- name: Clone bepasty source
+  git:
+    repo: https://github.com/bepasty/bepasty-server.git
+    dest: ~bepasty/src
+    update: yes
+  become_user: bepasty
+  notify:
+    - Restart bepasty
+  tags:
+    - bepasty
+
+- name: Create directories for storage, logs and gunicorn
+  file:
+    path: ~bepasty/{{ item }}
+    state: directory
+    mode: 0755
+    owner: bepasty
+  with_items:
+    - bin
+    - logs
+    - storage
+  tags:
+    - bepasty
+
+- name: Create socket directory and ensure correct access rights
+  file:
+    path: /var/run/nginx/
+    state: directory
+    mode: 2775
+    owner: http
+  tags:
+    - bepasty
+
+- name: Install dependencies inside bepasty virtualenv
+  pip:
+    requirements: ~bepasty/src/requirements.txt
+    state: latest
+    virtualenv: ~bepasty/.virtualenvs/bepasty
+  become_user: bepasty
+  tags:
+    - bepasty
+    - packages
+
+- name: Install additional dependencies for bepasty
+  pip:
+    name: "{{ item }}"
+    state: latest
+    virtualenv: ~bepasty/.virtualenvs/bepasty
+  become_user: bepasty
+  with_items:
+    - gunicorn
+    - gevent
+  tags:
+    - bepasty
+    - packages
+
+- name: Configure bepasty
+  template:
+    src: bepasty_conf.j2
+    dest: ~bepasty/bepasty.conf
+    owner: bepasty
+  tags:
+    - bepasty
+
+- name: Configure gunicorn
+  copy:
+    src: gunicorn_bepasty
+    dest: ~bepasty/bin/gunicorn_bepasty
+    owner: bepasty
+    mode: u+rwx
+  notify:
+    - Restart bepasty
+  tags:
+    - bepasty
+
+- name: Create bepasty service
+  copy:
+    src: bepasty_service
+    dest: /etc/systemd/system/bepasty.service
+  notify:
+    - Restart bepasty
+  tags:
+    - bepasty
+
+- name: Start and enable bepasty service
+  service:
+    name: bepasty
+    enabled: yes
+    state: started
+  tags:
+    - bepasty
+
+- name: Configure nginx
+  template:
+    src: nginx_bepasty.j2
+    dest: /etc/nginx/sites/bepasty.conf
+  notify:
+    - Reload nginx
+  tags:
+    - bepasty
