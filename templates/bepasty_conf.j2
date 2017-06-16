@@ -1,14 +1,14 @@
-SITENAME = 'up.{{ domain }}'
+SITENAME = '{{ bepasty_domain }}'
 
 #: Whether files are automatically locked after upload.
 #:
 #: If you want to require admin approval and manual unlocking for each
 #: uploaded file, set this to True.
-UPLOAD_LOCKED = False
+UPLOAD_LOCKED = {{ bepasty_upload_locked }}
 
 #: The site admin can set some maximum allowed file size he wants to
 #: accept here. This is the maximum size an uploaded file may have.
-MAX_ALLOWED_FILE_SIZE = 5 * 1000 * 1000 * 1000
+MAX_ALLOWED_FILE_SIZE = {{ bepasty_max_allowed_file_size }}
 
 #: The maximum http request body size.
 #: This is an information given to rest api clients so they can adjust
@@ -18,7 +18,7 @@ MAX_ALLOWED_FILE_SIZE = 5 * 1000 * 1000 * 1000
 #: settings:
 #: apache:  LimitRequestBody 1048576 # apache default is 0 (unlimited)
 #: nginx:  client_max_body_size 1m; # nginx default (== 1048576)
-MAX_BODY_SIZE = 1 * 1024 * 1024
+MAX_BODY_SIZE = {{ bepasty_max_body_size }}
 
 #: Setup maximum file sizes for specific content-types. If an item is
 #: beyond the limit set for its type, it will not be rendered, but just
@@ -56,7 +56,7 @@ MAX_RENDER_SIZE = {
 STORAGE = 'filesystem'
 
 #: Filesystem storage path
-STORAGE_FILESYSTEM_DIRECTORY = '/home/bepasty/storage'
+STORAGE_FILESYSTEM_DIRECTORY = '{{ bepasty_storage }}'
 
 #: server secret key needed for safe session cookies.
 #: you must set a very long, very random, very secret string here,
@@ -64,17 +64,17 @@ STORAGE_FILESYSTEM_DIRECTORY = '/home/bepasty/storage'
 SECRET_KEY = '{{ bepasty_secret_key }}'
 
 #: transmit cookie only over https (if you use http, set this to False)
-SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = {{ bepasty_session_cookie_secure }}
 #: use a permanent session (True, cookie will expire after the given
 #: time, see below) or not (False, cookie will get removed when browser
 #: is closed)
-PERMANENT_SESSION = True
+PERMANENT_SESSION = {{ bepasty_permanent_session }}
 #: lifetime of the permanent session (in seconds)
-PERMANENT_SESSION_LIFETIME = 31 * 24 * 3600
+PERMANENT_SESSION_LIFETIME = {{ bepasty_permanent_session_lifetime }}
 
 #: not-logged-in users get these permissions -
 #: usually they are either no permissions ('') or read-only ('read').
-DEFAULT_PERMISSIONS = 'read'
+DEFAULT_PERMISSIONS = '{{ bepasty_default_permissions }}'
 
 #: logged-in users may get more permissions.
 #: a user may have a login secret to log in and, depending on that secret,
@@ -92,6 +92,7 @@ DEFAULT_PERMISSIONS = 'read'
 #:         'uploadersecret': 'create,read',
 #:     }
 PERMISSIONS = {
-   '{{ bepasty_admin_secret }}': 'admin,list,create,read,delete',
-   '{{ bepasty_uploader_secret }}': 'create,read',
+   {% for permission in bepasty_permissions %}
+   '{{ permission.secret }}': '{{ permission.permissions }}',
+   {% endfor %}
 }

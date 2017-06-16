@@ -1,0 +1,24 @@
+---
+bepasty_domain: 'localhost'
+bepasty_secret_key: 'secretsecret'
+bepasty_admin_secret: 'verysecret'
+bepasty_uploader_secret: 'toosecret'
+bepasty_user: 'bepasty'
+bepasty_home: '/home/bepasty'
+
+# config options
+bepasty_upload_locked: 'False'
+bepasty_max_allowed_file_size: '5 * 1000 * 1000 * 1000'
+bepasty_max_body_size: '1 * 1024 * 1024'
+bepasty_permissions:
+  - secret: '{{ bepasty_admin_secret }}'
+    permissions: 'admin,list,create,read,delete'
+  - secret: '{{ bepasty_uploader_secret }}'
+    permissions: 'create,read'
+bepasty_default_permissions: 'read'
+bepasty_storage: '{{ bepasty_home }}/storage'
+bepasty_session_cookie_secure: 'True'
+bepasty_permanent_session: 'True'
+bepasty_permanent_session_lifetime: '31 * 24 * 3600'
+
+# TODO: add max_render_size
