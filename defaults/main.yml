@@ -5,6 +5,9 @@ bepasty_admin_secret: 'verysecret'
 bepasty_uploader_secret: 'toosecret'
 bepasty_user: 'bepasty'
 bepasty_home: '/home/bepasty'
+bepasty_source_dir: '{{ bepasty_home }}/src'
+bepasty_nginx_log_dir: '/var/log/nginx'
+bepasty_ssl_base_path: '/etc/ssl/letsencrypt/certs/'
 
 # config options
 bepasty_upload_locked: 'False'
@@ -22,3 +25,6 @@ bepasty_permanent_session: 'True'
 bepasty_permanent_session_lifetime: '31 * 24 * 3600'
 
 # TODO: add max_render_size
+
+bepasty_socket_dir: '/var/run/nginx/'
+bepasty_socket: 'gunicorn_bepasty.sock'

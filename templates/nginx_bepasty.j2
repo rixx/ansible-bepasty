@@ -1,11 +1,11 @@
 upstream pasty_server {
-    server unix:/var/run/nginx/gunicorn_bepasty.sock fail_timeout=0;
+    server unix:{{ bepasty_socket_dir }}{{ bepasty_socket }} fail_timeout=0;
 }
 
 server {
 	listen 443 ssl;
     listen [::]:443 ssl;
-    server_name {{ bepasty_subdomain }}.{{ domain }};
+    server_name {{ bepasty_domain }};
 
     location / {
         proxy_set_header Host $http_host;
@@ -13,15 +13,15 @@ server {
     }
 
 	location /static/ {
-		alias /home/bepasty/src/bepasty/static/;
+		alias {{ bepasty_source_dir }}/bepasty/static/;
 	}
 
-    access_log  /var/log/nginx/bepasty.access.log;
-    error_log   /var/log/nginx/bepasty.error.log;
+    access_log  {{ bepasty_nginx_log_dir }}/bepasty.access.log;
+    error_log   {{ bepasty_nginx_log_dir }}/bepasty.error.log;
 
     client_max_body_size 32M;
 
     ssl on;
-    ssl_certificate /etc/ssl/letsencrypt/certs/{{ bepasty_subdomain }}.{{ domain }}/fullchain.pem;
-    ssl_certificate_key /etc/ssl/letsencrypt/certs/{{ bepasty_subdomain }}.{{ domain }}/privkey.pem;
+    ssl_certificate {{ bepasty_ssl_base_path }}{{ bepasty_domain }}/fullchain.pem;
+    ssl_certificate_key {{ bepasty_ssl_base_path }}{{ bepasty_domain }}/privkey.pem;
 }
